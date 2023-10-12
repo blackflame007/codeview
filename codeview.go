@@ -56,21 +56,21 @@ func walkTree(node *sitter.Node, content []byte) {
 		return
 	}
 
-	// Handle non-leaf nodes by checking if the child nodes cover the entire text of the parent node
-	childStart := node.Child(0).StartByte()
-	childEnd := node.Child(int(node.ChildCount()) - 1).EndByte()
-
-	if childStart == node.StartByte() && childEnd == node.EndByte() {
-		// If the children cover the entire text of the parent, print the children instead
-		for i := 0; i < int(node.ChildCount()); i++ {
-			walkTree(node.Child(i), content)
+	// Handle non-leaf nodes
+	lastByte := node.StartByte()
+	for i := 0; i < int(node.ChildCount()); i++ {
+		child := node.Child(i)
+		// Print any text in the parent node that appears before this child
+		if child.StartByte() > lastByte {
+			fmt.Print(string(content[lastByte:child.StartByte()]))
 		}
-	} else {
-		// If the children do not cover the entire text of the parent, print the parent node text
-		if color, exists := config.ColorMap[nodeType]; exists {
-			color.Print(nodeText)
-		} else {
-			fmt.Print(nodeText)
-		}
+		// Recursively print the child
+		walkTree(child, content)
+		// Update lastByte to be the byte after the end of the child
+		lastByte = child.EndByte()
+	}
+	// Print any text in the parent node that appears after the last child
+	if lastByte < node.EndByte() {
+		fmt.Print(string(content[lastByte:node.EndByte()]))
 	}
 }
