@@ -62,7 +62,12 @@ func walkTree(node *sitter.Node, content []byte) {
 		child := node.Child(i)
 		// Print any text in the parent node that appears before this child
 		if child.StartByte() > lastByte {
-			fmt.Print(string(content[lastByte:child.StartByte()]))
+			preChildText := string(content[lastByte:child.StartByte()])
+			if color, exists := config.ColorMap[nodeType]; exists {
+				color.Print(preChildText)
+			} else {
+				fmt.Print(preChildText)
+			}
 		}
 		// Recursively print the child
 		walkTree(child, content)
@@ -71,6 +76,11 @@ func walkTree(node *sitter.Node, content []byte) {
 	}
 	// Print any text in the parent node that appears after the last child
 	if lastByte < node.EndByte() {
-		fmt.Print(string(content[lastByte:node.EndByte()]))
+		postChildText := string(content[lastByte:node.EndByte()])
+		if color, exists := config.ColorMap[nodeType]; exists {
+			color.Print(postChildText)
+		} else {
+			fmt.Print(postChildText)
+		}
 	}
 }
