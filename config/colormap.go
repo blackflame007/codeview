@@ -66,5 +66,10 @@ var ColorMap = map[string]*color.Color{
 	"field_identifier":                color.New(color.FgHiYellow),
 	"argument_list":                   color.New(color.FgHiYellow),
 	"function_declaration.identifier": color.New(color.FgHiGreen),
+	"call_expression.identifier":      color.New(color.FgHiCyan),
+	"selector_expression.identifier":  color.New(color.FgHiCyan),
+	"var_spec.type_identifier":        color.New(color.FgHiCyan),
+	"var_spec.identifier":             color.New(color.FgHiWhite),
+
 	// ... add more as needed
 }

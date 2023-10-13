@@ -39,18 +39,31 @@ func main() {
 	parser.SetLanguage(language)
 	tree := parser.Parse(nil, content)
 
-	walkTree(tree.RootNode(), content)
+	walkTree(tree.RootNode(), content, "")
 }
 
-func walkTree(node *sitter.Node, content []byte) {
+func walkTree(node *sitter.Node, content []byte, parentType string) {
 	nodeText := string(content[node.StartByte():node.EndByte()])
 	nodeType := node.Type()
 
+	// Construct a string that represents the node type and its parent type
+	var fullNodeType string
+	if parentType != "" {
+		fullNodeType = parentType + "." + nodeType
+	} else {
+		fullNodeType = nodeType
+	}
+
 	// Check if the node is a leaf node (has no children)
 	if node.ChildCount() == 0 {
-		if color, exists := config.ColorMap[nodeType]; exists {
+		// First, try to color using the full node type
+		if color, exists := config.ColorMap[fullNodeType]; exists {
+			color.Print(nodeText)
+		} else if color, exists := config.ColorMap[nodeType]; exists {
+			// If that fails, try to color using just the node type
 			color.Print(nodeText)
 		} else {
+			// If that also fails, print without color
 			fmt.Print(nodeText)
 		}
 		return
@@ -62,25 +75,15 @@ func walkTree(node *sitter.Node, content []byte) {
 		child := node.Child(i)
 		// Print any text in the parent node that appears before this child
 		if child.StartByte() > lastByte {
-			preChildText := string(content[lastByte:child.StartByte()])
-			if color, exists := config.ColorMap[nodeType]; exists {
-				color.Print(preChildText)
-			} else {
-				fmt.Print(preChildText)
-			}
+			fmt.Print(string(content[lastByte:child.StartByte()]))
 		}
 		// Recursively print the child
-		walkTree(child, content)
+		walkTree(child, content, nodeType)
 		// Update lastByte to be the byte after the end of the child
 		lastByte = child.EndByte()
 	}
 	// Print any text in the parent node that appears after the last child
 	if lastByte < node.EndByte() {
-		postChildText := string(content[lastByte:node.EndByte()])
-		if color, exists := config.ColorMap[nodeType]; exists {
-			color.Print(postChildText)
-		} else {
-			fmt.Print(postChildText)
-		}
+		fmt.Print(string(content[lastByte:node.EndByte()]))
 	}
 }
