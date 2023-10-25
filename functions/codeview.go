@@ -1,4 +1,4 @@
-package main
+package functions
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/blackflame007/codeview/config"
+	"github.com/blackflame007/codeview/colors"
 	sitter "github.com/smacker/go-tree-sitter"
 	"github.com/smacker/go-tree-sitter/golang"
 )
@@ -15,13 +15,10 @@ var languageMap = map[string]*sitter.Language{
 	".go": golang.GetLanguage(),
 }
 
-func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Usage: treesitter_highlight <file_path>")
-		os.Exit(1)
-	}
+func Highlight() {
+	filePath := os.Args[2]
 
-	filePath := os.Args[1]
+	// colors.InitColors()
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		fmt.Println("Error reading file:", err)
@@ -56,10 +53,12 @@ func walkTree(node *sitter.Node, content []byte, parentType string) {
 
 	// Check if the node is a leaf node (has no children)
 	if node.ChildCount() == 0 {
+		// fmt.Println(colors.)
 		// First, try to color using the full node type
-		if color, exists := config.ColorMap[fullNodeType]; exists {
+		if color, exists := colors.ColorMap[fullNodeType]; exists {
+			fmt.Println(color)
 			color.Print(nodeText)
-		} else if color, exists := config.ColorMap[nodeType]; exists {
+		} else if color, exists := colors.ColorMap[nodeType]; exists {
 			// If that fails, try to color using just the node type
 			color.Print(nodeText)
 		} else {
